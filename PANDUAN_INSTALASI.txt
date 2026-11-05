@@ -1,0 +1,102 @@
+PORTAL MONITORING KDKMP KOTA TEGAL
+VERSI GITHUB PAGES + GOOGLE APPS SCRIPT LANGSUNG (TANPA CLOUDFLARE)
+
+ISI PAKET
+1. Code.gs       : Backend Google Apps Script.
+2. index.html    : Frontend untuk GitHub Pages.
+
+ARSITEKTUR
+GitHub Pages (index.html) -> Google Apps Script Web App (Code.gs) -> Google Sheets.
+Tidak menggunakan Cloudflare Worker.
+
+A. SIAPKAN DATABASE GOOGLE SHEETS
+1. Upload file "KDKMP Kota Tegal.xlsx" ke Google Drive.
+2. Klik kanan file > Open with > Google Sheets. Pastikan sudah menjadi Google Spreadsheet.
+3. Pastikan sheet sumber bernama "Sheet1" dan berisi kolom seperti file Excel awal:
+   No | Kelurahan | Kecamatan | Progres Bangunan | NIB | Lokasi Bangunan | Koordinat | Zona Peruntukkan
+4. Dari spreadsheet tersebut pilih Extensions > Apps Script.
+
+B. PASANG BACKEND
+1. Di Apps Script buka file Code.gs.
+2. Hapus kode lama dan tempel seluruh isi Code.gs dari paket ini.
+3. Klik Save.
+4. Pada Apps Script pilih Project Settings (ikon roda gigi).
+5. Di bagian Script Properties klik Add script property.
+   Property: ADMIN_PASSWORD
+   Value   : buat password admin yang kuat dan unik.
+   Jangan gunakan password contoh dan jangan membagikannya di GitHub.
+6. Kembali ke editor, pilih fungsi setupDatabase lalu klik Run.
+7. Berikan izin yang diminta Google.
+8. Pastikan log eksekusi menyatakan Database siap dan 27 data KDKMP tersedia.
+   Fungsi setupDatabase membuat/melengkapi sheet MASTER_KDKMP dan DOKUMENTASI.
+   Jika MASTER_KDKMP sudah memiliki data, data tersebut tidak diimpor ulang dari Sheet1.
+
+C. DEPLOY APPS SCRIPT SEBAGAI WEB APP
+1. Klik Deploy > New deployment.
+2. Klik ikon roda gigi / Select type > Web app.
+3. Description: KDKMP API.
+4. Execute as: Me.
+5. Who has access: Anyone.
+6. Klik Deploy dan selesaikan otorisasi.
+7. Salin URL Web app yang berakhiran /exec.
+   Contoh bentuk URL: https://script.google.com/macros/s/AKfycb.../exec
+8. Jika Code.gs diubah di kemudian hari: Deploy > Manage deployments > Edit > New version > Deploy.
+
+CATATAN AKSES
+Web App harus dapat diakses Anyone agar dashboard publik pada GitHub Pages bisa membaca JSONP.
+Semua fungsi perubahan data tetap memerlukan token admin yang diterbitkan setelah password diperiksa di server.
+Jangan menaruh ADMIN_PASSWORD di index.html atau di repository GitHub.
+
+D. HUBUNGKAN FRONTEND GITHUB PAGES
+1. Buka index.html dari paket ini.
+2. Cari baris:
+   const API_URL = 'TEMPEL_URL_WEB_APP_APPS_SCRIPT_DI_SINI';
+3. Ganti teks di dalam tanda kutip dengan URL Web App /exec yang disalin pada langkah C.
+   Contoh:
+   const API_URL = 'https://script.google.com/macros/s/AKfycb.../exec';
+4. Simpan index.html.
+5. Upload/replace index.html di repository GitHub Pages.
+6. Tunggu GitHub Pages selesai deploy, lalu buka URL portal.
+
+E. PENGUJIAN
+1. Buka URL GitHub Pages. Dashboard seharusnya menampilkan 27 KDKMP.
+2. Pastikan statistik dan daftar kecamatan muncul.
+3. Klik salah satu KDKMP untuk membuka detail.
+4. Klik Admin, masukkan password yang disimpan pada Script Properties.
+5. Ubah data uji pada satu KDKMP, simpan, lalu cek perubahan di Google Sheets.
+6. Tambahkan dokumentasi dengan URL gambar yang dapat diakses publik, lalu cek detail KDKMP.
+7. Logout dan pastikan tombol pengelolaan admin tidak lagi tersedia.
+
+CARA KERJA KOMUNIKASI TANPA CLOUDFLARE
+- Pembacaan dashboard publik memakai JSONP melalui doGet.
+- Login dan mutasi admin dikirim sebagai POST form-urlencoded dengan mode no-cors agar tidak memicu preflight.
+- Hasil POST disimpan sementara di CacheService dan diambil melalui JSONP menggunakan ID permintaan acak.
+- Password tidak dikirim pada URL query string. Password dikirim dalam body POST dan diverifikasi di Apps Script.
+
+KEAMANAN DAN BATASAN
+- Deployment Anyone membuat endpoint publik dapat dipanggil dari internet. Endpoint publik hanya mengembalikan daftar kolom yang diizinkan.
+- Kolom Nama_Ketua, No_HP_Ketua, Omzet_Bulanan, Nilai_Aset, dan kolom internal lain tidak dikirim pada endpoint publik.
+- Fungsi admin memerlukan token sementara yang diverifikasi di server.
+- Upaya login gagal dibatasi secara global melalui CacheService.
+- Jangan menyimpan password admin di GitHub, HTML, atau Google Sheets.
+- Link foto dokumentasi harus berupa URL gambar yang bisa ditampilkan publik. Jangan memasukkan tautan file rahasia.
+- Pengiriman file foto langsung belum diaktifkan pada versi ini; dokumentasi menggunakan URL foto.
+
+TROUBLESHOOTING
+1. Dashboard kosong:
+   - Pastikan API_URL berisi URL /exec yang benar.
+   - Pastikan deployment terbaru memiliki akses Anyone.
+   - Buka Apps Script > Executions untuk melihat error.
+   - Pastikan setupDatabase() sudah dijalankan.
+2. Password admin ditolak:
+   - Pastikan Script Property bernama persis ADMIN_PASSWORD.
+   - Pastikan password yang dimasukkan sama.
+   - Jika terlalu banyak percobaan gagal, tunggu sekitar 15 menit.
+3. Perubahan tidak tersimpan:
+   - Pastikan login admin berhasil dan sesi belum kedaluwarsa.
+   - Periksa Apps Script > Executions.
+   - Pastikan deployment menggunakan versi terbaru setelah perubahan Code.gs.
+4. Setelah mengubah Code.gs, selalu buat New version pada Manage deployments.
+
+PENTING
+Uji terlebih dahulu dengan perubahan data yang tidak kritis. Pastikan spreadsheet database memiliki salinan cadangan sebelum digunakan operasional.
