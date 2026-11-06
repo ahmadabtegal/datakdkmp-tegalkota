@@ -1,0 +1,26 @@
+PEMBARUAN PORTAL KDKMP KOTA TEGAL – LOGO, FAVICON, DAN PETA
+
+Isi paket:
+- index.html: halaman portal yang sudah ditambahkan tiga logo dan favicon KDKMP.
+- logo-kdkmp.webp: logo Kopdes/Kel Merah Putih pada header.
+- logo-kota-tegal.png: logo Pemerintah Kota Tegal pada header.
+- logo-dpmptsp.png: logo DPMPTSP pada header.
+- favicon-kdkmp.png: favicon dari logo KDKMP.
+
+PERUBAHAN PETA:
+- Sumber tile diganti dari server tile standar OpenStreetMap yang pada screenshot menunjukkan "Access blocked".
+- Menggunakan CARTO Voyager dengan atribusi OpenStreetMap dan CARTO.
+- Data marker tetap menggunakan koordinat pada kolom Koordinat di Google Sheets.
+- Code.gs tidak diubah.
+
+CARA PEMASANGAN GITHUB PAGES:
+1. Buka repository GitHub yang menjadi sumber GitHub Pages.
+2. Upload/ganti index.html dari paket ini.
+3. Upload empat file gambar (logo-kdkmp.webp, logo-kota-tegal.png, logo-dpmptsp.png, favicon-kdkmp.png) ke folder/root yang sama dengan index.html.
+4. Commit changes.
+5. Buka portal, tekan Ctrl+F5. Jika favicon belum berubah, tutup tab dan buka kembali atau bersihkan cache favicon.
+
+PENTING:
+- Semua file gambar harus berada pada direktori yang sama dengan index.html karena referensi gambar menggunakan path relatif.
+- Code.gs dan URL API tidak perlu diubah.
+- Tile CARTO memerlukan koneksi internet dan tunduk pada ketentuan penggunaan penyedia tile.
